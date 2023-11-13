@@ -1,35 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { socket } from "./socket";
+import { useEffect } from "react";
+import { ConnectionManager } from "./components/ConnectionManager";
+import { MessagesList } from "./components/MessagesList";
+import { NewMesssageForm } from "./components/NewMessageForm";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [is_connected, set_is_connected] = useState(socket.connected);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    function on_connect() {
+      console.log("socket has connected", socket.id);
+      console.log("socket server offset is", socket.auth.serverOffset);
+      console.log("socket is", socket);
+      set_is_connected(true);
+    }
+
+    function on_disconnect() {
+      console.log("socket has disconnected", socket.id);
+      console.log("socket server offset is", socket.auth.serverOffset);
+      set_is_connected(false);
+    }
+
+    function on_chat_message(msg, server_message_offset) {
+      console.log("socket has received a new message from the server", msg);
+      socket.auth.serverOffset = server_message_offset;
+      setMessages((msgs) => [...msgs, msg]);
+    }
+
+    socket.on("connect", on_connect);
+    socket.on("disconnect", on_disconnect);
+    socket.on("chat_message", on_chat_message);
+
+    return () => {
+      socket.off("connect", on_connect);
+      socket.off("disconnect", on_disconnect);
+      socket.off("chat_message", on_chat_message);
+    };
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+      <h1>Hola Amigos!</h1>
+      <p>
+        Current connection status: $
+        {is_connected ? "connected" : "disconnected"}
       </p>
+      <MessagesList messages={messages} />
+      <ConnectionManager />
+      <NewMesssageForm updateMessages={setMessages} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
