@@ -11,10 +11,12 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
+    children: [
+      { path: "accounts/login", element: <LoginPage /> },
+      { path: "accounts/logout", element: <h1>logout Page!!</h1> },
+      { path: "accounts/signup", element: <h1>signup Page!!</h1> },
+    ],
   },
-  { path: "/accounts/login", element: <LoginPage /> },
-  { path: "/accounts/logout", element: <h1>logout Page!!</h1> },
-  { path: "/accounts/signup", element: <h1>signup Page!!</h1> },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

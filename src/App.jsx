@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Chat from "./Chat";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 
 // implement a global user state?
 export default function App() {
@@ -34,24 +34,33 @@ export default function App() {
 
   return (
     <>
-      <h2>Hello world!</h2>
-      {is_loading && <i>loading ...</i>}
-      {error && <i>Error: {error}</i>}
-      {!user_id && <p>You must be logged in as a user to access the chat!</p>}
-      {user_id && <i>user id: {user_id}</i>}
-      {!user_id && !error && (
-        <Link to={"/accounts/login"}>
-          <p>Login</p>
-        </Link>
-      )}
-      {!user_id && !error && (
-        <Link to={"/accounts/signup"}>
-          <p>signup</p>
-        </Link>
-      )}
+      <div id="sidebar">
+        <h2>Hello world!</h2>
+        {is_loading && <i>loading ...</i>}
+        {error && <i>Error: {error}</i>}
+        {!user_id && !error && (
+          <p>You must be logged in as a user to access the chat!</p>
+        )}
+        {user_id && <i>user id: {user_id}</i>}
+        {!user_id && !error && (
+          <Link to={"/accounts/login"}>
+            <p>Login</p>
+          </Link>
+        )}
+        {!user_id && !error && (
+          <Link to={"/accounts/signup"}>
+            <p>signup</p>
+          </Link>
+        )}
 
-      {/* {!user_id && <Link to={"/accounts/login"}></Link>} */}
-      {user_id && !error && <Chat />}
+        {/* {!user_id && <Link to={"/accounts/login"}></Link>} */}
+        {user_id && !error && <Chat />}
+      </div>
+      {!error && (
+        <div id="detail">
+          <Outlet />
+        </div>
+      )}
     </>
   );
 }

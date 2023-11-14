@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./App.css";
+
 import { socket } from "./socket";
 import { useEffect } from "react";
 import { ConnectionManager } from "./components/ConnectionManager";

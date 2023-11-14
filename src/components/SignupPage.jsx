@@ -13,7 +13,7 @@ export default function LoginPage() {
     try {
       const response = await axios({
         method: "POST",
-        url: "http://localhost:3000/accounts/login",
+        url: "http://localhost:3000/accounts/signup",
         withCredentials: true,
         data: {
           username, // here both these fields
@@ -27,7 +27,7 @@ export default function LoginPage() {
       console.log(data);
       if (data.statusCode === 200) {
         // update the user_id global state
-
+        // here we would redirect to login page!
         // dispatch an action
         set_is_loading(false);
       } else {
@@ -43,6 +43,7 @@ export default function LoginPage() {
   return (
     <>
       {error && <p>{error}</p>}
+      {loading && <i>Loading</i>}
       <form onSubmit={handleLogin}>
         <label htmlFor="username">Username</label>
         <input
@@ -50,6 +51,8 @@ export default function LoginPage() {
           name="username"
           id="username"
           value={username}
+          min={3}
+          max={16}
           onChange={(e) => set_username(e.target.value)}
         />
         <br />
@@ -60,11 +63,13 @@ export default function LoginPage() {
           name="password"
           id="password"
           value={password}
+          min={5}
+          max={16}
           onChange={(e) => set_password(e.target.value)}
         />
         <br />
 
-        <button type="submit">Login</button>
+        <button type="submit">Signup</button>
       </form>
     </>
   );
