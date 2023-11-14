@@ -1,58 +1,57 @@
-import { useState } from "react";
-import "./App.css";
-import { socket } from "./socket";
-import { useEffect } from "react";
-import { ConnectionManager } from "./components/ConnectionManager";
-import { MessagesList } from "./components/MessagesList";
-import { NewMesssageForm } from "./components/NewMessageForm";
+import { useEffect, useState } from "react";
+import Chat from "./Chat";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
-function App() {
-  const [is_connected, set_is_connected] = useState(socket.connected);
-  const [messages, setMessages] = useState([]);
+// implement a global user state?
+export default function App() {
+  const [user_id, set_user_id] = useState(null);
+  const [is_loading, set_is_loading] = useState(false);
+  const [error, set_error] = useState(null);
 
   useEffect(() => {
-    function on_connect() {
-      console.log("socket has connected", socket.id);
-      console.log("socket server offset is", socket.auth.serverOffset);
-      console.log("socket is", socket);
-      set_is_connected(true);
+    async function fetch_logged_in_user_details() {
+      set_is_loading(true);
+      try {
+        const is_logged_in_response = await axios({
+          method: "GET",
+          url: "http://localhost:3000/accounts/is_logged_in",
+          withCredentials: true,
+        });
+        const response_data = is_logged_in_response.data;
+        console.log("fetched logged in details is: ", response_data);
+        if (response_data.status) {
+          set_user_id(response_data.user_id);
+        }
+        set_is_loading(false);
+      } catch (err) {
+        set_error(err.message);
+        set_is_loading(false);
+      }
     }
-
-    function on_disconnect() {
-      console.log("socket has disconnected", socket.id);
-      console.log("socket server offset is", socket.auth.serverOffset);
-      set_is_connected(false);
-    }
-
-    function on_chat_message(msg, server_message_offset) {
-      console.log("socket has received a new message from the server", msg);
-      socket.auth.serverOffset = server_message_offset;
-      setMessages((msgs) => [...msgs, msg]);
-    }
-
-    socket.on("connect", on_connect);
-    socket.on("disconnect", on_disconnect);
-    socket.on("chat_message", on_chat_message);
-
-    return () => {
-      socket.off("connect", on_connect);
-      socket.off("disconnect", on_disconnect);
-      socket.off("chat_message", on_chat_message);
-    };
+    fetch_logged_in_user_details();
   }, []);
 
   return (
     <>
-      <h1>Hola Amigos!</h1>
-      <p>
-        Current connection status: $
-        {is_connected ? "connected" : "disconnected"}
-      </p>
-      <MessagesList messages={messages} />
-      <ConnectionManager />
-      <NewMesssageForm updateMessages={setMessages} />
+      <h2>Hello world!</h2>
+      {is_loading && <i>loading ...</i>}
+      {error && <i>Error: {error}</i>}
+      {!user_id && <p>You must be logged in as a user to access the chat!</p>}
+      {user_id && <i>user id: {user_id}</i>}
+      {!user_id && !error && (
+        <Link to={"/accounts/login"}>
+          <p>Login</p>
+        </Link>
+      )}
+      {!user_id && !error && (
+        <Link to={"/accounts/signup"}>
+          <p>signup</p>
+        </Link>
+      )}
+
+      {/* {!user_id && <Link to={"/accounts/login"}></Link>} */}
+      {user_id && !error && <Chat />}
     </>
   );
 }
-
-export default App;
